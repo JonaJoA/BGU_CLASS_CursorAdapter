@@ -1,7 +1,10 @@
 package com.jonajoapps.caculatortest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -85,6 +88,35 @@ public class MainActivity extends Activity {
 
         //connect the adapter to the ListView
         listView.setAdapter(myAdapter);
+
+
+        /**
+         *shared prefernces example
+         * if there was no value set in firstStart key then show this dialog every time
+         */
+        final SharedPreferences sp = getSharedPreferences("Settings", MODE_PRIVATE);
+        final String key = "firstStart";
+
+        long first = sp.getLong(key, 0);
+        if (first == 0) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("First launch");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    sp.edit().putLong(key, System.currentTimeMillis()).apply();
+                    dialog.dismiss();
+                }
+            });
+
+            builder.setNegativeButton("Keep show me this dialog", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
     }
 
     /**
