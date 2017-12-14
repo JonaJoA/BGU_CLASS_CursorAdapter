@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CaculatorTest.iml" filepath="$PROJECT_DIR$/CaculatorTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/BGU_CLASS_CursorAdapter.iml" filepath="$PROJECT_DIR$/.idea/BGU_CLASS_CursorAdapter.iml" />
+      <module fileurl="file://C:\Users\SHAY\Documents\Projects\BGU_CLASS_CursorAdapter\CaculatorTest.iml" filepath="C:\Users\SHAY\Documents\Projects\BGU_CLASS_CursorAdapter\CaculatorTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

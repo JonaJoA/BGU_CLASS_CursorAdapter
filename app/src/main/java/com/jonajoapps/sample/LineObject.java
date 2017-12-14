@@ -1,4 +1,4 @@
-package com.jonajoapps.caculatortest;
+package com.jonajoapps.sample;
 
 import java.util.Date;
 
@@ -11,10 +11,17 @@ import java.util.Date;
 
 public class LineObject {
     public String title;
+    public String imageUrl;
     public Date date;
 
     public LineObject(String title) {
         this.title = title;
         this.date = new Date();
+    }
+
+    public LineObject(String title, long dateInMillis, String imgUrl) {
+        this.title = title;
+        this.date = new Date(dateInMillis);
+        this.imageUrl = imgUrl;
     }
 }

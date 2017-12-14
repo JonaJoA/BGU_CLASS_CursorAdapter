@@ -1,11 +1,14 @@
-package com.jonajoapps.caculatortest;
+package com.jonajoapps.sample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,15 +18,22 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jonajoapps.caculatortest.R;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 
 public class MainActivity extends Activity {
 
     public static final String TAG = "MainActivity";
+    public static final int REQUEST_CODE = 1;
 
     /**
      * the adapter that will connect our SQL DB to the listview
@@ -47,14 +57,20 @@ public class MainActivity extends Activity {
         final EditText input = (EditText) findViewById(R.id.inputLine);
 
         //Model SQL Local DataBase
-        db = new DBOpenHelper(getApplicationContext());
-
+        db = DBOpenHelper.getInstance(getApplicationContext());
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Here we handle a list view item click
+
+                //we create an intent to open EditActivity
+                //and we pass the row id parameter
                 Log.e(TAG, "ListView Item position:" + position + " was clicked");
+                Intent in = new Intent(getApplicationContext(), EditActivity.class);
+                in.putExtra(EditActivity.ROW_ID, id);
+
+                startActivityForResult(in, REQUEST_CODE);
             }
         });
 
@@ -64,16 +80,15 @@ public class MainActivity extends Activity {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 String str = input.getText().toString();
                 if (str.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Cannot add empty string", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Cannot add empty title", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 //Create an object
                 LineObject obj = new LineObject(str);
-
+                obj.imageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmtR0UO-4S6W3YhU96Lt-BY1plpfWNQ7HXh2S9hFWit460fhur";
                 //add the object to the SQLModel
                 db.insertLine(obj);
 
@@ -88,7 +103,6 @@ public class MainActivity extends Activity {
 
         //connect the adapter to the ListView
         listView.setAdapter(myAdapter);
-
 
         /**
          *shared prefernces example
@@ -116,6 +130,16 @@ public class MainActivity extends Activity {
                 }
             });
             builder.show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            //this will get called when EditActivity will finish working correctly
+            myAdapter.changeCursor(db.getAllRows(0));
         }
     }
 
@@ -150,11 +174,13 @@ public class MainActivity extends Activity {
 
             TextView title = (TextView) view.findViewById(R.id.title);
             TextView date = (TextView) view.findViewById(R.id.date);
+            ImageView imageView = (ImageView) findViewById(R.id.image);
 
             /**
              * Here we pull the info from single object stored in the DB
              */
             String titleString = cursor.getString(cursor.getColumnIndex(DBOpenHelper.KEY_TITLE));
+            final String imageUrl = cursor.getString(cursor.getColumnIndex(DBOpenHelper.KEY_IMAGE));
             long aLong = cursor.getLong(cursor.getColumnIndex(DBOpenHelper.KEY_DATE));
 
             /**
@@ -162,6 +188,31 @@ public class MainActivity extends Activity {
              */
             title.setText(titleString);
             date.setText(new Date(aLong).toString());
+
+            getImageFromNetwork(imageView, imageUrl);
+        }
+
+        private void getImageFromNetwork(final ImageView imageView, final String imageUrl) {
+            new Thread("ImageThread") {
+                @Override
+                public void run() {
+                    try {
+                        URL url = new URL(imageUrl);
+                        final Bitmap image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                imageView.setImageBitmap(image);
+                            }
+                        });
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        System.out.println(e);
+                    }
+                }
+            }.start();
         }
     }
 }
