@@ -9,6 +9,26 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+
+        <Button
+            android:id="@+id/startService"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:text="Start service" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <EditText

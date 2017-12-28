@@ -20,7 +20,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.jonajoapps.sample.EditActivity"></activity>
+        <activity android:name="com.jonajoapps.sample.EditActivity" />
+
+        <service
+            android:name="com.jonajoapps.sample.MyIntentService"
+            android:exported="false" />
+        <service
+            android:name="com.jonajoapps.sample.DownloadFileService"
+            android:exported="false" />
+        <service
+            android:name="com.jonajoapps.sample.MyIntentService2"
+            android:exported="false"></service>
     </application>
 
 </manifest>

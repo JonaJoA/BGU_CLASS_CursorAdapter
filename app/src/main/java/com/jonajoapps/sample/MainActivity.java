@@ -2,9 +2,11 @@ package com.jonajoapps.sample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -20,6 +22,7 @@ import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +38,19 @@ public class MainActivity extends Activity {
     public static final String TAG = "MainActivity";
     public static final int REQUEST_CODE = 1;
 
+    enum ActivityState {
+        UNKNOWN,
+        START,
+        STOP
+    }
+
+    public static ActivityState getmCurrentState() {
+        return mCurrentState;
+    }
+
+    private static ActivityState mCurrentState = ActivityState.UNKNOWN;
+
+
     /**
      * the adapter that will connect our SQL DB to the listview
      */
@@ -45,6 +61,9 @@ public class MainActivity extends Activity {
      * in this case we store our objects in SQL DataBase
      */
     private DBOpenHelper db;
+    private int index = 0;
+    private BroadcastReceiver receiver;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +75,18 @@ public class MainActivity extends Activity {
         Button add = (Button) findViewById(R.id.addButton);
         final EditText input = (EditText) findViewById(R.id.inputLine);
 
+
+        Button startService = (Button) findViewById(R.id.startService);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setMax(9);
+        startService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent in = new Intent(getApplicationContext(), MyIntentService.class);
+
+                startService(in);
+            }
+        });
         //Model SQL Local DataBase
         db = DBOpenHelper.getInstance(getApplicationContext());
 
@@ -83,6 +114,8 @@ public class MainActivity extends Activity {
                 String str = input.getText().toString();
                 if (str.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Cannot add empty title", Toast.LENGTH_SHORT).show();
+
+                    index++;
                     return;
                 }
 
@@ -131,6 +164,35 @@ public class MainActivity extends Activity {
             });
             builder.show();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mCurrentState = ActivityState.START;
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MyIntentService.FILE_DOWNLOAD_Q_ACTION);
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int index = intent.getIntExtra(MyIntentService.CURRENT, 0);
+                progressBar.setProgress(index);
+                if (index == 9) {
+                    Toast.makeText(getApplicationContext(), "DONE Download", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mCurrentState = ActivityState.STOP;
+
+        unregisterReceiver(receiver);
     }
 
     @Override
