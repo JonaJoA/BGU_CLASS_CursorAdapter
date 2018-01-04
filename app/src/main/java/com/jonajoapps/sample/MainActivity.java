@@ -77,6 +77,7 @@ public class MainActivity extends Activity {
 
 
         Button startService = (Button) findViewById(R.id.startService);
+        Button fetchNetwork = (Button) findViewById(R.id.fetchNetwork);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setMax(9);
         startService.setOnClickListener(new View.OnClickListener() {
@@ -85,6 +86,46 @@ public class MainActivity extends Activity {
                 Intent in = new Intent(getApplicationContext(), MyIntentService.class);
 
                 startService(in);
+            }
+        });
+
+        fetchNetwork.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NetworkManager instance = NetworkManager.getInstance();
+                instance.addRequest(new GetNotificationByIdRequest("1", new ServerCallback() {
+
+                    @Override
+                    public void onSuccess(Object res, int statusCode) {
+                        //Here we come when return from network
+                    }
+
+                    @Override
+                    public void onFailure(Object err, int statusCode) {
+
+                    }
+                }));
+
+
+//
+//                NetworkManager.getInstance().addRequest(new GetNotificationsRequest(new ServerCallback() {
+//                    @Override
+//                    public void onSuccess(final Object res, int statusCode) {
+//                        Log.e(TAG, (String) res);
+//
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Toast.makeText(getApplicationContext(), (String) res, Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Object err, int statusCode) {
+//
+//                    }
+//                }));
             }
         });
         //Model SQL Local DataBase
